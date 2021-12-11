@@ -33,18 +33,26 @@ describe("Create Statement Use Case", () => {
 
     const userCreated = await createUserUseCase.execute(userData)
 
-    console.log(userCreated)
-
-    const statementData: ICreateStatementDTO = {
+    const depositStatement: ICreateStatementDTO = {
       user_id: userCreated.id,
       type: OperationType.DEPOSIT,
       amount: 100,
       description: "test"
     }
 
-    const statementCreated = await createStatementUseCase.execute(statementData)
+    const withdrawStatement: ICreateStatementDTO = {
+      user_id: userCreated.id,
+      type: OperationType.WITHDRAW,
+      amount: 87,
+      description: "test"
+    }
 
-    console.log(statementCreated)
+    const depositStatementCreated = await createStatementUseCase.execute(depositStatement)
+    const withdrawStatementCreated = await createStatementUseCase.execute(withdrawStatement)
 
+    expect(depositStatementCreated).toHaveProperty("amount")
+    expect(depositStatementCreated.amount).toEqual(100)
+    expect(withdrawStatementCreated.user_id).toEqual(userCreated.id)
+    expect(withdrawStatementCreated.amount).toEqual(87)
   })
 })

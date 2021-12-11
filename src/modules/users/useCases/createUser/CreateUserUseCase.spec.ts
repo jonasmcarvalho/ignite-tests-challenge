@@ -28,9 +28,7 @@ describe("Create User Use Case", () => {
     expect(userCreated).toHaveProperty('email')
     expect(userCreated).toHaveProperty('name')
     expect(userCreated).toHaveProperty('password')
-
-
-
+    expect(userCreated?.name).toEqual("Jonas Carvalho")
   })
 })
 

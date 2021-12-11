@@ -12,19 +12,20 @@ describe("Create User Controller", () => {
   });
 
   afterAll(async () => {
-    await connection.dropDatabase();
+    // await connection.dropDatabase();
     await connection.close();
   });
 
   it("Should be able to create a new user", async () => {
 
-    const response = await request(app).post('/api/v1/users')
+    const responseUserCreated = await request(app).post('/api/v1/users')
       .send({
         name: "Jonas Carvalho",
         email: "admin456@finapi.com.br",
         password: "password"
       })
 
-    expect(response.status).toBe(201);
+    expect(responseUserCreated.status).toBe(201);
+
   })
 })

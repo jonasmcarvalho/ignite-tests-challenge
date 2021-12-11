@@ -40,5 +40,8 @@ describe("Authenticate User Controller", () => {
       })
 
     expect(response.status).toEqual(200)
+    expect(response.body.user.name).toEqual("admin")
+    expect(response.body.user).toHaveProperty("id")
+    expect(response.body).toHaveProperty("token")
   })
 })

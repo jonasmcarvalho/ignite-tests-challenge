@@ -16,7 +16,7 @@ describe("Show User Profile Use Case", () => {
 
   it("Should be able a show user profile", async () => {
     const user = {
-      name: "Jonas Show",
+      name: "Jonas Carvalho",
       email: "jonas@jonasshow.com.br",
       password: "1234"
     }
@@ -31,5 +31,7 @@ describe("Show User Profile Use Case", () => {
     expect(userProfile).toHaveProperty("name");
     expect(userProfile).toHaveProperty("email");
     expect(userProfile).toHaveProperty("password");
+    expect(userProfile.name).toEqual("Jonas Carvalho")
+    expect(userProfile.email).toEqual("jonas@jonasshow.com.br")
   })
 })
