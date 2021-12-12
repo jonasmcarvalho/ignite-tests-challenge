@@ -48,4 +48,36 @@ describe("Show User Profile Controller", () => {
     expect(responseProfile.body).toHaveProperty("created_at")
     expect(userCreated.body).toHaveProperty("token")
   })
+
+  it("Should be able a show user profile with a token missing", async () => {
+
+    const userCreated = await request(app).post("/api/v1/sessions").send({
+      email: "admin@finapi.com.br",
+      password: "admin"
+    })
+
+    const responseProfile = await request(app)
+      .get("/api/v1/profile")
+      .send()
+
+    expect(responseProfile.status).toBe(401)
+    expect(responseProfile.body.message).toEqual("JWT token is missing!")
+  })
+
+  it("Should not be able a show user profile with invalid user", async () => {
+
+    const userCreated = await request(app).post("/api/v1/sessions").send({
+      email: "admin@finapi.com.br",
+      password: "admin"
+    })
+
+    const responseProfile = await request(app)
+      .get("/api/v1/profile")
+      .send().set({
+        Authorization: `Bearer ${userCreated.body}`
+      })
+
+    expect(responseProfile.status).toBe(401)
+    expect(responseProfile.body.message).toEqual("JWT invalid token!")
+  })
 })

@@ -3,6 +3,7 @@ import { CreateUserUseCase } from "../../../users/useCases/createUser/CreateUser
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository";
 import { CreateStatementUseCase } from "../createStatement/CreateStatementUseCase";
 import { ICreateStatementDTO } from "../createStatement/ICreateStatementDTO";
+import { GetStatementOperationError } from "../getStatementOperation/GetStatementOperationError";
 import { GetBalanceUseCase } from "./GetBalanceUseCase";
 
 let inMemoryStatementRepository: InMemoryStatementsRepository;
@@ -17,12 +18,14 @@ enum OperationType {
 }
 
 describe("Get Balance Use Case Test", () => {
-  inMemoryUsersRepository = new InMemoryUsersRepository();
-  inMemoryStatementRepository = new InMemoryStatementsRepository();
-  createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
-  getBalanceUseCase = new GetBalanceUseCase(inMemoryStatementRepository, inMemoryUsersRepository);
-  createStatementUseCase = new CreateStatementUseCase(inMemoryUsersRepository, inMemoryStatementRepository)
-  getBalanceUseCase = new GetBalanceUseCase(inMemoryStatementRepository, inMemoryUsersRepository)
+  beforeEach(() => {
+    inMemoryUsersRepository = new InMemoryUsersRepository();
+    inMemoryStatementRepository = new InMemoryStatementsRepository();
+    createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
+    getBalanceUseCase = new GetBalanceUseCase(inMemoryStatementRepository, inMemoryUsersRepository);
+    createStatementUseCase = new CreateStatementUseCase(inMemoryUsersRepository, inMemoryStatementRepository)
+    getBalanceUseCase = new GetBalanceUseCase(inMemoryStatementRepository, inMemoryUsersRepository)
+  })
 
   it("Should be abe get a balance", async () => {
 
@@ -55,5 +58,12 @@ describe("Get Balance Use Case Test", () => {
 
     expect(getBalance.balance).toEqual(85.69)
     expect(getBalance).toHaveProperty("balance")
+  })
+
+  it("Should not be abe get a balance with an non-exists user", async () => {
+
+    await expect(getBalanceUseCase.execute(
+      { user_id: "userCreated.id" }
+    )).rejects.toEqual(new GetStatementOperationError.UserNotFound())
   })
 })

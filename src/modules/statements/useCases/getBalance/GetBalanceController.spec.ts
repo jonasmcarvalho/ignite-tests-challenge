@@ -28,7 +28,7 @@ describe("Get Balance Controller", () => {
     await connection.close()
   })
 
-  it("Get Balance Statement", async () => {
+  it("Should be abe a get balance statement", async () => {
     const user = {
       email: "admin@finapi.com.br",
       password: "admin"
@@ -69,4 +69,42 @@ describe("Get Balance Controller", () => {
     expect(responseBalance.body.balance).toEqual(85.5)
   })
 
+  it("Should not be abe a get balance statement with an non-existing user", async () => {
+    const user = {
+      email: "admin45@finapi.com.br",
+      password: "admin"
+    }
+
+    const userCreated = await request(app).post("/api/v1/sessions").send({
+      email: user.email,
+      password: user.password
+    })
+
+    await request(app)
+      .post("/api/v1/statements/deposit")
+      .send({
+        amount: 103,
+        description: "Test Create Statement Controller DEPOSIT"
+      }).set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    await request(app)
+      .post("/api/v1/statements/withdraw")
+      .send({
+        amount: 17.50,
+        description: "Test Create Statement Controller WITHDRAW"
+      }).set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    const responseBalance = await request(app)
+      .get("/api/v1/statements/balance")
+      .send().set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    expect(responseBalance.status).toBe(401)
+    expect(responseBalance.body.message).toEqual("JWT invalid token!")
+  })
 })

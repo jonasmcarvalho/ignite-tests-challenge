@@ -72,4 +72,89 @@ describe("Get Statement Operation Controller", () => {
     expect(getStatement.body).toHaveProperty("amount")
     expect(getStatement.body.amount).toEqual("17.50")
   })
+
+  it("Should not be abe to get a specific statement an non-existing user", async () => {
+    const user = {
+      email: "admin45@finapi.com.br",
+      password: "admin"
+    }
+
+    const userCreated = await request(app).post("/api/v1/sessions").send({
+      email: user.email,
+      password: user.password
+    })
+
+    const depositStatement = await request(app)
+      .post("/api/v1/statements/deposit")
+      .send({
+        amount: 103,
+        description: "Test Create Statement Controller DEPOSIT"
+      }).set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    const withdrawStatement = await request(app)
+      .post("/api/v1/statements/withdraw")
+      .send({
+        amount: 17.5,
+        description: "Test Create Statement Controller WITHDRAW"
+      }).set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    const { id: statement_id } = withdrawStatement.body;
+
+    const getStatement = await request(app)
+      .get(`/api/v1/statements/${statement_id}`)
+      .send()
+      .set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    expect(getStatement.status).toBe(401)
+    expect(getStatement.body.message).toEqual("JWT invalid token!")
+
+  })
+
+  it("Should not be abe to get a specific statement an non-existing statement", async () => {
+    const user = {
+      email: "admin@finapi.com.br",
+      password: "admin"
+    }
+
+    const userCreated = await request(app).post("/api/v1/sessions").send({
+      email: user.email,
+      password: user.password
+    })
+
+    const depositStatement = await request(app)
+      .post("/api/v1/statements/deposit")
+      .send({
+        amount: 103,
+        description: "Test Create Statement Controller DEPOSIT"
+      }).set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    const withdrawStatement = await request(app)
+      .post("/api/v1/statements/withdraw")
+      .send({
+        amount: 17.5,
+        description: "Test Create Statement Controller WITHDRAW"
+      }).set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    const statement_id = uuid();
+
+    const getStatement = await request(app)
+      .get(`/api/v1/statements/${statement_id}`)
+      .send()
+      .set({
+        Authorization: `Bearer ${userCreated.body.token}`
+      })
+
+    expect(getStatement.status).toBe(404)
+    expect(getStatement.body.message).toEqual("Statement not found")
+  })
 })

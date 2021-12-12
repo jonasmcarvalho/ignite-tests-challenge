@@ -27,7 +27,7 @@ describe("Authenticate User Controller", () => {
     await connection.close();
   });
 
-  it("Should be able to get a user data", async () => {
+  it("Should be able to authenticate and get a user data", async () => {
     const user = {
       email: 'admin@finapi.com.br',
       password: 'finapi'
@@ -44,4 +44,36 @@ describe("Authenticate User Controller", () => {
     expect(response.body.user).toHaveProperty("id")
     expect(response.body).toHaveProperty("token")
   })
+
+  it("Should not be able to authenticate and get a user data with incorrect password", async () => {
+    const user = {
+      email: 'admin@finapi.com.br',
+      password: 'finapu'
+    }
+
+    const response = await request(app).post('/api/v1/sessions')
+      .send({
+        email: user.email,
+        password: user.password
+      })
+
+    expect(response.status).toEqual(401)
+  })
+
+  it("Should not be able to authenticate and get a user data with incorrect e-mail", async () => {
+    const user = {
+      email: 'admin20@finapi.com.br',
+      password: 'finapi'
+    }
+
+    const response = await request(app).post('/api/v1/sessions')
+      .send({
+        email: user.email,
+        password: user.password
+      })
+
+    expect(response.status).toEqual(401)
+    expect(response.body.message).toEqual("Incorrect email or password")
+  })
+
 })

@@ -4,6 +4,7 @@ import { CreateUserUseCase } from "../../../users/useCases/createUser/CreateUser
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository";
 import { CreateStatementUseCase } from "../createStatement/CreateStatementUseCase";
 import { ICreateStatementDTO } from "../createStatement/ICreateStatementDTO";
+import { GetStatementOperationError } from "./GetStatementOperationError";
 import { GetStatementOperationUseCase } from "./GetStatementOperationUseCase";
 
 let inMemoryStatementRepository: InMemoryStatementsRepository;
@@ -64,5 +65,69 @@ describe("Get Statement Operation Use Case", () => {
     expect(statementOperation.amount).toEqual(103)
     expect(statementOperation.user_id).toEqual(userCreated.id)
     expect(statementOperation.id).toEqual(depositStatementCreated.id)
+  })
+
+  it("Should not be abe to get a specific statement operation with an non-existing user", async () => {
+    const userData = {
+      name: "Jonas Carvalho",
+      email: "jonas@jonas.com.br",
+      password: "1234"
+    }
+
+    const userCreated = await createUserUseCase.execute(userData)
+
+    const statementDepositData: ICreateStatementDTO = {
+      user_id: userCreated.id,
+      type: OperationType.DEPOSIT,
+      amount: 103,
+      description: "Deposit Statement"
+    }
+
+    const statementWithdrawData: ICreateStatementDTO = {
+      user_id: userCreated.id,
+      type: OperationType.WITHDRAW,
+      amount: 17.31,
+      description: "Withdraw Statement"
+    }
+
+    const depositStatementCreated = await createStatementUseCase.execute(statementDepositData)
+    const withdrawStatementCreated = await createStatementUseCase.execute(statementWithdrawData)
+
+    await expect(getStatementOperationUseCase.execute({
+      user_id: "depositStatementCreated.user_id",
+      statement_id: depositStatementCreated.id,
+    })).rejects.toEqual(new GetStatementOperationError.UserNotFound())
+  })
+
+  it("Should not be abe to get an non-existing specific statement operation", async () => {
+    const userData = {
+      name: "Jonas Carvalho",
+      email: "jonas@jonas.com.br",
+      password: "1234"
+    }
+
+    const userCreated = await createUserUseCase.execute(userData)
+
+    const statementDepositData: ICreateStatementDTO = {
+      user_id: userCreated.id,
+      type: OperationType.DEPOSIT,
+      amount: 103,
+      description: "Deposit Statement"
+    }
+
+    const statementWithdrawData: ICreateStatementDTO = {
+      user_id: userCreated.id,
+      type: OperationType.WITHDRAW,
+      amount: 17.31,
+      description: "Withdraw Statement"
+    }
+
+    const depositStatementCreated = await createStatementUseCase.execute(statementDepositData)
+    const withdrawStatementCreated = await createStatementUseCase.execute(statementWithdrawData)
+
+    await expect(getStatementOperationUseCase.execute({
+      user_id: depositStatementCreated.user_id,
+      statement_id: "depositStatementCreated.id",
+    })).rejects.toEqual(new GetStatementOperationError.StatementNotFound())
   })
 })

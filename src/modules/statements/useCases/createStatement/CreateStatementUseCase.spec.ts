@@ -1,6 +1,8 @@
 import { InMemoryUsersRepository } from "../../../users/repositories/in-memory/InMemoryUsersRepository";
+import { CreateUserError } from "../../../users/useCases/createUser/CreateUserError";
 import { CreateUserUseCase } from "../../../users/useCases/createUser/CreateUserUseCase";
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository"
+import { CreateStatementError } from "./CreateStatementError";
 import { CreateStatementUseCase } from "./CreateStatementUseCase";
 import { ICreateStatementDTO } from "./ICreateStatementDTO";
 
@@ -54,5 +56,40 @@ describe("Create Statement Use Case", () => {
     expect(depositStatementCreated.amount).toEqual(100)
     expect(withdrawStatementCreated.user_id).toEqual(userCreated.id)
     expect(withdrawStatementCreated.amount).toEqual(87)
+  })
+
+  it("Should not be able to create a new withdraw for an insufficient funds", async () => {
+    const userData = {
+      name: "Jonas Carvalho",
+      email: "jonas@jonas.com.br",
+      password: "1234"
+    }
+
+    const userCreated = await createUserUseCase.execute(userData)
+
+    const withdrawStatement: ICreateStatementDTO = {
+      user_id: userCreated.id,
+      type: OperationType.WITHDRAW,
+      amount: 100,
+      description: "withdraw"
+    }
+
+    await expect(
+      createStatementUseCase.execute(withdrawStatement)
+    ).rejects.toEqual(new CreateStatementError.InsufficientFunds())
+  })
+
+  it("Should not be able to create a new withdraw for an non-existing user", async () => {
+
+    const withdrawStatement: ICreateStatementDTO = {
+      user_id: "userCreated.id",
+      type: OperationType.WITHDRAW,
+      amount: 100,
+      description: "withdraw"
+    }
+
+    await expect(
+      createStatementUseCase.execute(withdrawStatement)
+    ).rejects.toEqual(new CreateStatementError.UserNotFound())
   })
 })

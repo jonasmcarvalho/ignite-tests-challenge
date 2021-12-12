@@ -1,5 +1,6 @@
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository"
 import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
+import { ShowUserProfileError } from "./ShowUserProfileError";
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase";
 
 
@@ -33,5 +34,11 @@ describe("Show User Profile Use Case", () => {
     expect(userProfile).toHaveProperty("password");
     expect(userProfile.name).toEqual("Jonas Carvalho")
     expect(userProfile.email).toEqual("jonas@jonasshow.com.br")
+  })
+
+  it("Should not be able to show a non-existing user profile", async () => {
+    await expect(
+      showUserProfileUSeCase.execute("userCreated.id")
+    ).rejects.toEqual(new ShowUserProfileError)
   })
 })
